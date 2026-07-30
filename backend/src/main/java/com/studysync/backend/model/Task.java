@@ -13,17 +13,19 @@ public class Task {
     private String courseName;
     private String description;
     private String dueDate;
+    private String dueTime;
     private String urgencyLevel; // LOW, MEDIUM, HIGH
     private String status;       // TODO, IN_PROGRESS, COMPLETED
     private List<SubTask> subTasks;
 
     public Task() {}
 
-    public Task(String title, String courseName, String description, String dueDate, String urgencyLevel, String status) {
+    public Task(String title, String courseName, String description, String dueDate, String dueTime, String urgencyLevel, String status) {
         this.title = title;
         this.courseName = courseName;
         this.description = description;
         this.dueDate = dueDate;
+        this.dueTime = dueTime;
         this.urgencyLevel = urgencyLevel;
         this.status = status;
     }
@@ -58,6 +60,8 @@ public class Task {
     public void setDescription(String description) { this.description = description; }
     public String getDueDate() { return dueDate; }
     public void setDueDate(String dueDate) { this.dueDate = dueDate; }
+    public String getDueTime() { return dueTime; }
+    public void setDueTime(String dueTime) { this.dueTime = dueTime; }
     public String getUrgencyLevel() { return urgencyLevel; }
     public void setUrgencyLevel(String urgencyLevel) { this.urgencyLevel = urgencyLevel; }
     public String getStatus() { return status; }

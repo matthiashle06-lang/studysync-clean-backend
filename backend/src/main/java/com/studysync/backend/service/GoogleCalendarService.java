@@ -2,6 +2,7 @@ package com.studysync.backend.service;
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
@@ -18,6 +19,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
@@ -50,11 +54,38 @@ public class GoogleCalendarService {
                 .setSummary("[" + task.getCourseName() + "] " + task.getTitle())
                 .setDescription("Urgency: " + task.getUrgencyLevel() + "\n" + task.getDescription());
 
-        // Format due date to RFC3339 String
-        EventDateTime start = new EventDateTime().setDateTime(new com.google.api.client.util.DateTime(task.getDueDate() + "T09:00:00Z"));
-        EventDateTime end = new EventDateTime().setDateTime(new com.google.api.client.util.DateTime(task.getDueDate() + "T10:00:00Z"));
-        event.setStart(start);
-        event.setEnd(end);
+        // --- NEW TIMEZONE LOGIC STARTS HERE ---
+        
+        // Grab the exact strings from your Android app
+        String dateString = task.getDueDate();
+        // Provide a fallback of 09:00 just in case the time string is empty
+        String timeString = (task.getDueTime() != null && !task.getDueTime().isEmpty()) ? task.getDueTime() : "09:00";
+
+        // Stitch them together into a standard format
+        LocalDateTime localDateTime = LocalDateTime.parse(dateString + "T" + timeString);
+
+        // Lock it explicitly to the Kuala Lumpur timezone
+        ZonedDateTime startZoned = localDateTime.atZone(ZoneId.of("Asia/Kuala_Lumpur"));
+        // Default the task duration to 1 hour
+        ZonedDateTime endZoned = startZoned.plusHours(1);
+
+        // Convert to Google's required DateTime format
+        DateTime startGoogleTime = new DateTime(startZoned.toOffsetDateTime().toString());
+        DateTime endGoogleTime = new DateTime(endZoned.toOffsetDateTime().toString());
+
+        // Attach them to the Event payload with the specific timezone string
+        EventDateTime startEvent = new EventDateTime()
+                .setDateTime(startGoogleTime)
+                .setTimeZone("Asia/Kuala_Lumpur");
+
+        EventDateTime endEvent = new EventDateTime()
+                .setDateTime(endGoogleTime)
+                .setTimeZone("Asia/Kuala_Lumpur");
+
+        event.setStart(startEvent);
+        event.setEnd(endEvent);
+        
+        // --- NEW TIMEZONE LOGIC ENDS HERE ---
 
         Event createdEvent = service.events().insert("primary", event).execute();
         return createdEvent.getId(); // Returns Google Event ID
