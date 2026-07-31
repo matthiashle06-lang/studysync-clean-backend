@@ -70,8 +70,9 @@ public class GoogleCalendarService {
         ZonedDateTime endZoned = startZoned.plusHours(1);
 
         // Convert to Google's required DateTime format
-        DateTime startGoogleTime = new DateTime(startZoned.toOffsetDateTime().toString());
-        DateTime endGoogleTime = new DateTime(endZoned.toOffsetDateTime().toString());
+        // Convert to Google's required DateTime format using Date objects to bypass string formatting crashes
+        DateTime startGoogleTime = new DateTime(java.util.Date.from(startZoned.toInstant()), java.util.TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
+        DateTime endGoogleTime = new DateTime(java.util.Date.from(endZoned.toInstant()), java.util.TimeZone.getTimeZone("Asia/Kuala_Lumpur"));
 
         // Attach them to the Event payload with the specific timezone string
         EventDateTime startEvent = new EventDateTime()
