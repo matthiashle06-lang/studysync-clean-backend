@@ -21,16 +21,25 @@ public class TaskController {
     @Autowired
     private GoogleCalendarService calendarService;
 
+    // --> NEW: Fetch tasks only for a specific user
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Task>> getTasksByUser(@PathVariable String userId) {
+        List<Task> userTasks = taskRepository.findByUserId(userId);
+        return ResponseEntity.ok(userTasks);
+    }
+
+    // Keep this for admin/testing purposes
     @GetMapping
     public List<Task> getAllTasks() {
         return taskRepository.findAll();
     }
 
-    // 2. Update this endpoint to grab the userId and push to Google Calendar
+    // 2. Grab the userId, attach it to the task, save to DB, and push to Google Calendar
     @PostMapping
     public ResponseEntity<?> createTask(@RequestParam String userId, @RequestBody Task task) {
         try {
-            // Save to MongoDB first
+            // Guarantee the user ID is explicitly attached before saving to MongoDB
+            task.setUserId(userId);
             Task savedTask = taskRepository.save(task);
             
             // Push to Google Calendar
