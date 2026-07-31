@@ -43,7 +43,7 @@ public class TaskController {
             Task savedTask = taskRepository.save(task);
             
             // Push to Google Calendar
-            //calendarService.exportTaskToGoogleCalendar(userId, savedTask);
+            calendarService.exportTaskToGoogleCalendar(userId, savedTask);
             
             return ResponseEntity.ok(savedTask);
         } catch (Exception e) {
